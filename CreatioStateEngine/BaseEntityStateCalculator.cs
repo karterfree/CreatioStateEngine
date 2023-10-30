@@ -15,6 +15,12 @@
 		#region Properties: Private
 
 		private ProcessStateDto Dto { get; set; }
+		
+		private IDataProvider _dataProvider;
+		private IDataProvider DataProvider {
+			get => _dataProvider ??= new LocalDataProvider(UserConnection);
+			set => _dataProvider = value;
+		}
 
 		#endregion
 
@@ -23,19 +29,14 @@
 		protected UserConnection UserConnection { get; set; }
 
 		private IAppDataContext _appDataContext;
-
 		protected IAppDataContext AppDataContext =>
-			_appDataContext != null ? _appDataContext : (_appDataContext = CreateAppDataContext());
+			_appDataContext ??= AppDataContextFactory.GetAppDataContext(DataProvider);
+		
 		//protected IWorkCurrencyRateHelper WorkCurrencyRateHelper { get; set; }
 
 		#endregion
-
+		
 		#region Methods: Private
-
-		private IAppDataContext CreateAppDataContext() {
-			var provider = new LocalDataProvider(UserConnection);
-			return AppDataContextFactory.GetAppDataContext(provider);
-		}
 
 		/*private IWorkCurrencyRateHelper CreateWorkCurrencyRateHelper() {
 			return ClassFactory.Get<IWorkCurrencyRateHelper>(
@@ -115,9 +116,10 @@
 
 		#region Methods: Internal
 
-		internal void Calculate(UserConnection userConnection, ProcessStateDto dto) {
+		internal void Calculate(UserConnection userConnection, ProcessStateDto dto, IDataProvider dataProvider) {
 			UserConnection = userConnection;
 			Dto = dto;
+			DataProvider = dataProvider;
 			//WorkCurrencyRateHelper = CreateWorkCurrencyRateHelper();
 			Calculate();
 		}
