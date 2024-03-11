@@ -32,6 +32,9 @@ namespace CreatioStateEngine
 		#region Methods: Private
 
 		private void Execute(UserConnection userConnection, ProcessStateDto processStateDto) {
+			if (!ClassFactory.HasBinding(typeof(IEntityStateCalculator), processStateDto.Key)) {
+				return;
+			}
 			var calculator = ClassFactory.Get<IEntityStateCalculator>(processStateDto.Key);
 			if (calculator is BaseEntityStateCalculator baseStateCalculator) {
 				baseStateCalculator.Calculate(userConnection, processStateDto, DataProvider);
